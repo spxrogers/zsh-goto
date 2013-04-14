@@ -1,36 +1,37 @@
 # goto.zsh
 
-function makeLabel {
-    printf "%s\t%s\n" $1 $PWD >> ~/.labels.tsv
-}
+$GOTO_FILE=~/.labels.tsv
 
 function label {
+    function makeLabel {
+         printf "%s\t%s\n" $1 $2 >> $GOTO_FILE
+    }
+
     if [ $# -eq 0 ]
-        then
-            echo "Usage: $ label <name> [dir]"
-            echo "    creates a label which goto can cd to"
-    elif [ $2 ]
-        then
-            cd $2
-            makeLabel $1
+    then
+        echo "Usage: $ label <name> [dir]"
+        echo "    creates a label which goto can cd to"
+    if [ -d "$2" ]
+    then
+        makeLabel $1 $2
     else
-        makeLabel $1
+        makeLabel $1 $PWD
     fi
 }
 
 function goto {
     if [ $# -eq 0 ]
-        then
-            echo "Usage: $ goto <name>"
-            echo "    jumps to a record set by label"
+    then
+        echo "Usage: $ goto <name>"
+        echo "    jumps to a record set by label"
     elif [[ "$1" == "ls" ]]
-        then
-            cat ~/.labels.tsv | awk "{ print \$1 }"
+    then
+        awk "{ print \$1 }" $GOTO_FILE
     else
-        dir=$(cat ~/.labels.tsv | grep -e "^$1" | tail -n 1 | sed s/"$1\t"//)
+        dir=$(awk "/^$1/ {print \$2;}" $GOTO_FILE)
         if [ $dir ]
-            then
-                cd $dir
+        then
+            cd $dir
         else
             echo $1 " was not found!"
         fi
@@ -38,14 +39,11 @@ function goto {
 }
 alias gt="goto"
 
-
 function _goto {
-    for label in $(awk '{print $1}' ~/.labels.tsv)
+    for label in $(awk '{print $1}' $GOTO_FILE)
     do
         compadd "$@" $label
     done
 }
 
 compdef _goto goto
-
-
