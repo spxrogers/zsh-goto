@@ -5,7 +5,7 @@ function _gotofile {
 }
 
 function _makeLabel {
-    printf "%s\t%s\n" $1 $2 >> `_gotofile`
+    printf "%s %s\n" $1 $2 >> `_gotofile`
 }
 
 function label {
@@ -28,7 +28,7 @@ function goto {
         echo "    jumps to a record set by label"
     elif [[ "$1" == "ls" ]]
     then
-        awk "{ print \$1 }" `_gotofile`
+        awk "{ print \$1 }" `_gotofile` | tr "\n" " " | column -t
     else
         cd $(awk "/^$1/ {print \$2;}" `_gotofile`)
     fi
