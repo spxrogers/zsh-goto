@@ -30,7 +30,7 @@ function goto {
     then
         awk "{ print \$1 }" `_gotofile` | tr "\n" " " | column -t
     else
-        cd $(awk "/^$1/ {print \$2;}" `_gotofile`)
+        cd $(awk "/^$1\s/ {print \$2;}" `_gotofile` | head -n 1)
     fi
 }
 
